@@ -11,6 +11,7 @@ setup(
         "transformers>=4.0.0",
         "click",
         "requests",
+        "gdown>=4.6.4",
     ],
     entry_points={
         "console_scripts": [
