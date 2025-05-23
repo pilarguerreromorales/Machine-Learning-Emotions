@@ -1,45 +1,36 @@
-import requests
+
+import gdown
 from pathlib import Path
+import torch
+from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
-# the same MODEL_NAME and MODEL_PATH you already have
-MODEL_NAME = "distilroberta-base"
-MODEL_PATH = Path(__file__).parent.parent / "models" / "emotion_model.pt"
+MODEL_NAME    = "distilroberta-base"
+MODEL_PATH    = Path(__file__).parent.parent / "models" / "emotion_model.pt"
 
-# Your Google Drive file ID
-GDRIVE_FILE_ID = "1AbCdEFGhIJklmNoPQRsTuvWXyz"
 
 def download_from_cloud_storage(dest: Path):
     """
-    Download the Google-Drive-hosted model to `dest`.
+    Download a large file from Google Drive using gdown,
+    which handles confirmation tokens automatically.
     """
-    url = (
-        "https://docs.google.com/uc?export=download"
-        f"&id={GDRIVE_FILE_ID}"
-    )
-    with requests.get(url, stream=True) as r:
-        r.raise_for_status()
-        dest.parent.mkdir(parents=True, exist_ok=True)
-        with open(dest, "wb") as f:
-            for chunk in r.iter_content(chunk_size=1_024*1_024):
-                if chunk:
-                    f.write(chunk)
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    url = f"https://drive.google.com/file/d/1qEy4bXsFFx338ay0kRvAH5qr7PN2xpYJ/view?usp=sharing"
+    # will overwrite if exists; quiet=False shows progress
+    gdown.download(url, str(dest), quiet=False, fuzzy=True)
 
 def get_model():
-    # Only download once
+    # Download once
     if not MODEL_PATH.exists():
         print("Downloading model (this will only happen once)...")
         download_from_cloud_storage(MODEL_PATH)
 
     # Load tokenizer & model
-    from transformers import AutoModelForSequenceClassification, AutoTokenizer
-    import torch
-
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
     model     = AutoModelForSequenceClassification.from_pretrained(
         MODEL_NAME, num_labels=6
     )
-    state_dict = torch.load(MODEL_PATH, map_location="cpu")
+    # force full unpickle (weights_only=False) to load your fine-tuned state dict
+    state_dict = torch.load(MODEL_PATH, map_location="cpu", weights_only=False)
     model.load_state_dict(state_dict)
     model.eval()
     return model, tokenizer
-
