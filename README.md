@@ -59,7 +59,7 @@ your_kaggle_username
 
 ---
 
-## 📊 Experimental Results
+## Experimental Results
 
 | Trial | Description | Train Loss | Val F1 |
 |-------|-------------|------------|--------|
