@@ -81,4 +81,4 @@ Here is the training vs validation loss curve for the final model:
 
 - Pip-installable package   
 - CLI tool (`inference`)   
-- Report (see attached PDF)   
+- Report (see attached PDF)   - Twitter Emotion Classification Challenge (1).pdf 
